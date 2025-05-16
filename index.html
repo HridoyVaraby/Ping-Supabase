@@ -66,8 +66,9 @@
         // Function to ping Supabase
         async function pingSupabase() {
             try {
-                // Make a simple request to the health-check endpoint
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/_health`, {
+                // Make a simple request to the REST API with a limit=1 query
+                // This is more reliable than the health endpoint
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/?apikey=${SUPABASE_PUBLIC_KEY}`, {
                     method: 'GET',
                     headers: {
                         'apikey': SUPABASE_PUBLIC_KEY,
