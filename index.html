@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Keep-Alive</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #3ecf8e; /* Supabase green */
+            margin-bottom: 1rem;
+        }
+        p {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            margin-top: 1rem;
+            font-family: monospace;
+        }
+        .success {
+            color: #3ecf8e;
+        }
+        .error {
+            color: #e54d2e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Supabase Keep-Alive</h1>
+        <p>This page automatically pings your Supabase database to prevent it from pausing due to inactivity.</p>
+        <div id="status" class="status">Connecting to Supabase...</div>
+    </div>
+
+    <script>
+        // Configuration - Replace with your Supabase URL and public API key
+        const SUPABASE_URL = 'https://wdupgaorsaepunnjddnn.supabase.co';
+        const SUPABASE_PUBLIC_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkdXBnYW9yc2FlcHVubmpkZG5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ4MjI5NzIsImV4cCI6MjA1MDM5ODk3Mn0.yxL1x8BvmQEcfhYweavgA8MOcjigDqCLhdTg5vy-Q2Q';
+        
+        // Status element reference
+        const statusElement = document.getElementById('status');
+        
+        // Function to ping Supabase
+        async function pingSupabase() {
+            try {
+                // Make a simple request to the health-check endpoint
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/_health`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_PUBLIC_KEY,
+                        'Authorization': `Bearer ${SUPABASE_PUBLIC_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const formattedTime = new Date().toLocaleString();
+                
+                // Log success in console
+                console.log(`Supabase API pinged successfully at ${formattedTime}`);
+                
+                // Update status on page
+                statusElement.innerHTML = `✅ Supabase API pinged successfully at ${formattedTime}`;
+                statusElement.classList.add('success');
+                statusElement.classList.remove('error');
+                
+                // Schedule next ping (every 10 minutes)
+                setTimeout(pingSupabase, 10 * 60 * 1000);
+                
+            } catch (error) {
+                // Log error in console
+                console.error('Failed to ping Supabase:', error);
+                
+                // Update status on page
+                statusElement.innerHTML = `❌ Failed to ping Supabase: ${error.message}`;
+                statusElement.classList.add('error');
+                statusElement.classList.remove('success');
+                
+                // Retry after 1 minute on failure
+                setTimeout(pingSupabase, 60 * 1000);
+            }
+        }
+        
+        // Initial ping when page loads
+        document.addEventListener('DOMContentLoaded', pingSupabase);
+    </script>
+</body>
+</html>
